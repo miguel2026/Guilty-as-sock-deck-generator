@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/HealthCheck"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+    volumes:
+      - .:/Código
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+volumes:
+  db-data:

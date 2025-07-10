@@ -1,0 +1,30 @@
+// Minimo de 
+@startuml Banco de dados
+
+entity card {
+    id: int << PK >>
+    deck_id: int << FK >>
+    user_id: int << FK >>
+    Tagline: String
+    Content: Sttring
+}
+
+entity deck {
+    id: int << PK >>
+    user_id: << FK >>
+    name: String
+    is_valid: Boolean
+    description: String
+}
+
+entity user {
+    id: int << PK >>
+    name: String
+    email: String
+    password: String
+}
+
+user ||--o{ deck
+deck ||--o{ card
+
+@enduml
