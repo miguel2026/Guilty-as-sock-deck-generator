@@ -11,7 +11,7 @@ entity card {
 
 entity deck {
     id: int << PK >>
-    user_id: << FK >>
+    user_id: int << FK >>
     name: String
     is_valid: Boolean
     description: String

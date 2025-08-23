@@ -8,15 +8,12 @@
 </head>
 
 <body>
-    <h1>Welcome to the Guilty as sock deck generator</h1>
-    {% for deck in decks %}
-        <h2>{{deck.name}}</h2>
-        <p>Description: {{deck.description}}</p>
-        {% for card in deck.cards %}
-            <p></p>
-            <p>Card Name: {{card.name}}</p>
-            <p>Card Description: {{card.description}}</p>
-        {% endfor %}
+    <h1>{{deck.name}}</h1>
+    <h2>Description: {{deck.description}}</h2>
+    {% for card in deck.cards %}
+        <p></p>
+        <p>Card Name: {{card.name}}</p>
+        <p>Card Description: {{card.description}}</p>
     {% endfor %}
 </body>
 
