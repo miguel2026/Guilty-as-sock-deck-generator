@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Response, Request
+from fastapi import APIRouter, Response, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.templating import Jinja2Templates
-from Model import Models
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from typing import Annotated
+from Workflow import services
+import jwt
+
 
 router = APIRouter()
-
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 templates = Jinja2Templates(directory="Presentation/templates")
 
 # Docker
@@ -16,42 +18,38 @@ async def Helth_check_Docker():
 
 
 # Page for the creattion and seeing of the decks
-@router.get("/Decks", tags=["Decks"], response_class=HTMLResponse)
-async def main_page(request:Request):
+@router.get("/Deck/{id}", tags=["Decks"], response_class=HTMLResponse)
+async def main_page(request:Request, id: int, token: Annotated[str, Depends(oauth2_scheme)] = None):
+    
+    user_id = services.id_from_token(token)
+    user = services.fake_user(user_id)
 
-    # enquanto não tem tokens
-    user = Models.User(
-        id=1,
-        username="testuser",
-        email="test@email.com",
-        password="password123",
-        decks=[
-            Models.Deck(
-                id=1,
-                user_id=1,
-                name="Test Deck",
-                description="A test deck for unit testing.",
-                cards=[
-                    Models.Card(
-                        id=1,
-                        deck_id=1,
-                        name="Test Card 1",
-                        description="This is a test card.",
-                        image_url="http://example.com/image1.png"
-                    ),
-                    Models.Card(
-                        id=2,
-                        deck_id=1,
-                        name="Test Card 2",
-                        description="This is another test card.",
-                        image_url="http://example.com/image2.png"
-                    )
-                ]
-            )])
-
-    Decks = user.decks
-    return templates.TemplateResponse(request,"main_page.html", context={"decks": Decks})
+    # Enquanto não tem banco de dados
+    Deck = user.decks[0]
+    return templates.TemplateResponse(request,"main_page.html", context={"deck": Deck})
 
 
+@router.post("/login", tags=["Authentication"])
+async def login(form: Annotated[OAuth2PasswordRequestForm, Depends()]):
+
+    user = services.fake_user(services.id_from_name(form.username))
+
+    if not user:
+        print("User not found")
+        return HTTPException(404, detail="Invalid credentials")
+    
+    hashed_pass = services.hash_password(form.password)
+    
+    if not services.verify_password(form.password, user.password):
+        print("Not the same password")
+        return HTTPException(404, detail="Invalid credentials")
+    else:
+        token = services.create_access_token(user.model_dump())
+        return token
+
+
+@router.post("/sign_up", tags=["Authentication"])
+async def sign_up(request:Request):
+    pass
 
 

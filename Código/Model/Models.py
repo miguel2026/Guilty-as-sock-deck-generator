@@ -21,3 +21,10 @@ class User(BaseModel):
     email: str
     password: str
     decks: Optional[list[Deck]] = None
+
+class DeckName(BaseModel):
+    name: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
